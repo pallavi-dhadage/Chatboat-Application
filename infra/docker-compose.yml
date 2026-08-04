@@ -1,0 +1,206 @@
+version: "3.9"
+
+# =============================================================================
+# AI-Powered Real-Time Chat Platform — Docker Compose Stack
+# Run with: docker compose --env-file .env up --build
+# =============================================================================
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # Nginx — reverse proxy and static file server
+  # Routes: /api/v1/* and /socket.io/* → flask:5000
+  #         /admin/*                   → django:8000
+  #         /                          → frontend static bundle
+  # ---------------------------------------------------------------------------
+  nginx:
+    image: nginx:1.25-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
+      - backend-flask
+      - backend-django
+    networks:
+      - chat-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ---------------------------------------------------------------------------
+  # Frontend — React 18 SPA (Vite build, served by Nginx in production image)
+  # ---------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    expose:
+      - "3000"
+    environment:
+      - VITE_API_BASE_URL=/api/v1
+      - VITE_SOCKET_URL=/
+    networks:
+      - chat-network
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # backend-flask — Chat_Service (Flask + Flask-SocketIO)
+  # Handles REST API, WebSocket events, JWT auth, AI orchestration
+  # ---------------------------------------------------------------------------
+  backend-flask:
+    build:
+      context: ../backend-flask
+      dockerfile: Dockerfile
+    expose:
+      - "5000"
+    env_file:
+      - ../.env
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - MYSQL_URL=${MYSQL_URL}
+      - REDIS_URL=${REDIS_URL}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_REFRESH_SECRET_KEY=${JWT_REFRESH_SECRET_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_S3_BUCKET=${AWS_S3_BUCKET}
+      - AWS_REGION=${AWS_REGION}
+      - LANGSMITH_API_KEY=${LANGSMITH_API_KEY}
+      - LANGCHAIN_TRACING_V2=${LANGCHAIN_TRACING_V2}
+      - FLASK_ENV=${FLASK_ENV}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    networks:
+      - chat-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ---------------------------------------------------------------------------
+  # backend-django — Admin_Service (Django admin panel)
+  # Provides /admin/ CRUD UI for user management
+  # ---------------------------------------------------------------------------
+  backend-django:
+    build:
+      context: ../backend-django
+      dockerfile: Dockerfile
+    expose:
+      - "8000"
+    env_file:
+      - ../.env
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DJANGO_DEBUG=${DJANGO_DEBUG}
+      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - chat-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL — primary relational database
+  # Stores: users, conversations, messages, notifications, refresh_tokens
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    expose:
+      - "5432"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-chatdb}
+      - POSTGRES_USER=${POSTGRES_USER:-chatuser}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-chatpass}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - chat-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-chatuser} -d ${POSTGRES_DB:-chatdb}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # Redis — pub/sub adapter, rate limiting, presence, JWT revocation cache
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    expose:
+      - "6379"
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis-data:/data
+    networks:
+      - chat-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # MySQL — secondary analytics database
+  # Stores: analytics_daily_rollup, ai_usage_stats
+  # ---------------------------------------------------------------------------
+  mysql:
+    image: mysql:8.0
+    expose:
+      - "3306"
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-analyticsdb}
+      - MYSQL_USER=${MYSQL_USER:-analyticsuser}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-analyticspass}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpass}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - chat-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${MYSQL_USER:-analyticsuser}", "-p${MYSQL_PASSWORD:-analyticspass}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+# =============================================================================
+# Named volumes — data persists across container restarts
+# =============================================================================
+volumes:
+  postgres-data:
+    driver: local
+  mysql-data:
+    driver: local
+  redis-data:
+    driver: local
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  chat-network:
+    driver: bridge

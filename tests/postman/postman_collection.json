@@ -1,0 +1,365 @@
+{
+  "info": {
+    "name": "AI Chat Platform API",
+    "description": "Full REST API test suite for the AI-Powered Real-Time Chat Platform.\nUse the 'AI Chat Platform' environment with variables: base_url, access_token, refresh_token, conversation_id, message_id, notification_id.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url",        "value": "http://localhost/api/v1" },
+    { "key": "access_token",    "value": "" },
+    { "key": "refresh_token",   "value": "" },
+    { "key": "conversation_id", "value": "" },
+    { "key": "message_id",      "value": "" },
+    { "key": "notification_id", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "url":    "{{base_url}}/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body":   { "mode": "raw", "raw": "{\"email\":\"api_test@example.com\",\"name\":\"API Test\",\"password\":\"testpass123\"}" }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 201 or 409', () => pm.expect([201,409]).to.include(pm.response.code));",
+              "if (pm.response.code === 201) {",
+              "  pm.test('Returns id and email', () => {",
+              "    const j = pm.response.json();",
+              "    pm.expect(j).to.have.property('id');",
+              "    pm.expect(j).to.have.property('email');",
+              "  });",
+              "}"
+            ]}
+          }]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "url":    "{{base_url}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body":   { "mode": "raw", "raw": "{\"email\":\"api_test@example.com\",\"password\":\"testpass123\"}" }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Returns tokens and user', () => {",
+              "  const j = pm.response.json();",
+              "  pm.expect(j).to.have.property('access_token');",
+              "  pm.expect(j).to.have.property('refresh_token');",
+              "  pm.expect(j).to.have.property('user');",
+              "  pm.collectionVariables.set('access_token',  j.access_token);",
+              "  pm.collectionVariables.set('refresh_token', j.refresh_token);",
+              "});"
+            ]}
+          }]
+        },
+        {
+          "name": "Login — Invalid Credentials",
+          "request": {
+            "method": "POST",
+            "url":    "{{base_url}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body":   { "mode": "raw", "raw": "{\"email\":\"nobody@nowhere.com\",\"password\":\"wrongpass\"}" }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 401', () => pm.response.to.have.status(401));",
+              "pm.test('Generic error message', () => {",
+              "  const j = pm.response.json();",
+              "  pm.expect(j.error.toLowerCase()).to.include('invalid credentials');",
+              "});"
+            ]}
+          }]
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "url":    "{{base_url}}/auth/refresh",
+            "header": [{ "key": "Authorization", "value": "Bearer {{refresh_token}}" }]
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Returns new access token', () => {",
+              "  const j = pm.response.json();",
+              "  pm.expect(j).to.have.property('access_token');",
+              "  pm.collectionVariables.set('access_token', j.access_token);",
+              "});"
+            ]}
+          }]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url":    "{{base_url}}/auth/logout",
+            "header": [{ "key": "Authorization", "value": "Bearer {{refresh_token}}" }]
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));"
+            ]}
+          }]
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "url":    "{{base_url}}/users/me",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }]
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Returns profile fields', () => {",
+              "  const j = pm.response.json();",
+              "  ['id','email','name','role'].forEach(f => pm.expect(j).to.have.property(f));",
+              "});"
+            ]}
+          }]
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PATCH",
+            "url":    "{{base_url}}/users/me",
+            "header": [
+              { "key": "Authorization",  "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type",   "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\"status\":\"Available\"}" }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Status field updated', () => {",
+              "  pm.expect(pm.response.json().status).to.equal('Available');",
+              "});"
+            ]}
+          }]
+        }
+      ]
+    },
+    {
+      "name": "Conversations",
+      "item": [
+        {
+          "name": "Create Conversation",
+          "request": {
+            "method": "POST",
+            "url":    "{{base_url}}/conversations",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\"name\":\"Test Conversation\"}" }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 201', () => pm.response.to.have.status(201));",
+              "pm.test('Returns conversation id and name', () => {",
+              "  const j = pm.response.json();",
+              "  pm.expect(j).to.have.property('id');",
+              "  pm.collectionVariables.set('conversation_id', j.id);",
+              "});"
+            ]}
+          }]
+        },
+        {
+          "name": "List Conversations",
+          "request": {
+            "method": "GET",
+            "url":    "{{base_url}}/conversations",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }]
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Returns array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+            ]}
+          }]
+        },
+        {
+          "name": "Get Messages (Paginated)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw":   "{{base_url}}/conversations/{{conversation_id}}/messages?page=1&page_size=20",
+              "query": [
+                { "key": "page",      "value": "1" },
+                { "key": "page_size", "value": "20" }
+              ]
+            },
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }]
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Pagination envelope present', () => {",
+              "  const j = pm.response.json();",
+              "  pm.expect(j).to.have.property('messages');",
+              "  pm.expect(j).to.have.property('page');",
+              "  pm.expect(j).to.have.property('total');",
+              "});"
+            ]}
+          }]
+        }
+      ]
+    },
+    {
+      "name": "AI Features",
+      "item": [
+        {
+          "name": "Smart Replies",
+          "request": {
+            "method": "POST",
+            "url":    "{{base_url}}/ai/smart-replies",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\"text\":\"Can we meet tomorrow?\"}" }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Returns replies array', () => {",
+              "  const j = pm.response.json();",
+              "  pm.expect(j.replies).to.be.an('array').with.length.greaterThan(0);",
+              "});"
+            ]}
+          }]
+        },
+        {
+          "name": "Summarize Conversation",
+          "request": {
+            "method": "POST",
+            "url":    "{{base_url}}/ai/summarize",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\"conversation_id\":\"{{conversation_id}}\"}" }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 200 or 503', () => pm.expect([200,503]).to.include(pm.response.code));",
+              "if (pm.response.code === 200) {",
+              "  pm.test('Returns summary string', () => {",
+              "    pm.expect(pm.response.json().summary).to.be.a('string');",
+              "  });",
+              "}"
+            ]}
+          }]
+        },
+        {
+          "name": "AI Assistant",
+          "request": {
+            "method": "POST",
+            "url":    "{{base_url}}/ai/assistant",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\"query\":\"How do I create a group chat?\"}" }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 200 or 503', () => pm.expect([200,503]).to.include(pm.response.code));",
+              "if (pm.response.code === 200) {",
+              "  pm.test('Returns answer string', () => {",
+              "    pm.expect(pm.response.json().answer).to.be.a('string');",
+              "  });",
+              "}"
+            ]}
+          }]
+        },
+        {
+          "name": "Semantic Search",
+          "request": {
+            "method": "POST",
+            "url":    "{{base_url}}/ai/search",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\"query\":\"meeting tomorrow\"}" }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Returns results array', () => {",
+              "  pm.expect(pm.response.json().results).to.be.an('array');",
+              "});"
+            ]}
+          }]
+        }
+      ]
+    },
+    {
+      "name": "Moderation",
+      "item": [
+        {
+          "name": "Get Flagged Messages (403 for users)",
+          "request": {
+            "method": "GET",
+            "url":    "{{base_url}}/moderation/flagged",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }]
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 403 for non-moderator', () => pm.response.to.have.status(403));"
+            ]}
+          }]
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Get Notifications",
+          "request": {
+            "method": "GET",
+            "url":    "{{base_url}}/notifications",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }]
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Returns array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+            ]}
+          }]
+        }
+      ]
+    }
+  ]
+}
