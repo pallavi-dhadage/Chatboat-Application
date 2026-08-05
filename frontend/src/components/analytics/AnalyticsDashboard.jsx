@@ -24,8 +24,8 @@ export default function AnalyticsDashboard() {
   }, []);
 
   if (loading) return <div className="p-8 text-gray-500">Loading analytics…</div>;
-  if (error)   return <div className="p-8 text-red-500">{error}</div>;
-  if (!metrics) return null;
+  if (error) return <div className="p-8 text-red-500">{error}</div>;
+  if (!metrics) return <div className="p-8 text-gray-500">No analytics available.</div>;
 
   const sentimentData = (metrics.sentiment_trend || []).map((d) => ({
     date:     d.date,

@@ -1,0 +1,37 @@
+# =============================================================================
+# ai-services — Python dependencies
+# =============================================================================
+
+# ML / AI core
+tensorflow==2.15.0
+scikit-learn==1.4.2
+joblib==1.4.2
+numpy==1.26.4
+pandas==2.2.2
+
+# LLM and agent orchestration
+groq==0.9.0
+langgraph==0.1.14
+langchain==0.2.6
+langchain-groq==0.1.6
+langsmith==0.1.83
+
+# Embeddings and vector search
+sentence-transformers==3.0.1
+faiss-cpu==1.8.0
+torch==2.3.1 --index-url https://download.pytorch.org/whl/cpu
+
+# Image processing
+opencv-python-headless==4.10.0.84
+Pillow==10.3.0
+
+# Database connectivity (for analytics engine)
+SQLAlchemy==2.0.31
+psycopg2-binary==2.9.9
+PyMySQL==1.1.1
+
+# Caching
+redis==5.0.7
+
+# Utilities
+python-dotenv==1.0.1
