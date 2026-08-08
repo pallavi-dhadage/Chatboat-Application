@@ -1,1 +1,35 @@
-@tailwind base;@tailwind components;@tailwind utilities;body { margin: 0; font-family: Inter, system-ui, sans-serif; background: #020617; }
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  background: #020617;
+}
+
+/* Shimmer animation for Skeleton components */
+@keyframes shimmer {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* Dark-mode shimmer overrides — brighter keyframe stop for dark backgrounds */
+@media (prefers-color-scheme: dark) {
+  .animate-shimmer {
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+}
+
+/* Class-based dark mode support (controlled by uiStore applyTheme) */
+.dark .animate-shimmer {
+  animation: shimmer 1.5s ease-in-out infinite;
+}
