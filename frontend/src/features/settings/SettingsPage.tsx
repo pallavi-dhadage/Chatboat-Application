@@ -36,6 +36,7 @@ export default function SettingsPage() {
     formState: { errors, isSubmitting },
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
+    mode: 'onBlur',
     defaultValues: {
       name: user?.name ?? '',
       status: user?.status ?? '',

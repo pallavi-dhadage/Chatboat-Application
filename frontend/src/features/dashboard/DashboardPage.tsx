@@ -325,7 +325,7 @@ export default function DashboardPage() {
           Welcome back, {firstName} 👋
         </h1>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Here's a snapshot of platform activity.
+          Here&apos;s a snapshot of platform activity.
         </p>
       </div>
 

@@ -2,10 +2,11 @@
  * NotificationCenter — persistent sidebar notification list.
  */
 
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNotificationStore } from '../../store/notificationSlice';
-import { useChatStore } from '../../store/chatSlice';
+import { useChatStore } from '../../store/chatStore';
+import type { Notification } from '../../types';
 
 export default function NotificationCenter() {
   const { notifications, unreadCount, fetchNotifications, markRead } = useNotificationStore();
@@ -16,11 +17,12 @@ export default function NotificationCenter() {
     fetchNotifications();
   }, []);
 
-  const handleClick = async (n) => {
+  const handleClick = async (n: Notification) => {
     await markRead(n.id);
-    if (n.payload?.conversation_id) {
-      setActiveConversation(n.payload.conversation_id);
-      navigate('/');
+    const convId = (n.payload as Record<string, string>)?.conversation_id;
+    if (convId) {
+      setActiveConversation(convId);
+      navigate('/chat');
     }
   };
 
@@ -40,7 +42,7 @@ export default function NotificationCenter() {
         {notifications.length === 0 ? (
           <p className="p-4 text-sm text-gray-500 text-center">No unread notifications</p>
         ) : (
-          notifications.map((n) => (
+          notifications.map((n: Notification) => (
             <button
               key={n.id}
               onClick={() => handleClick(n)}
@@ -48,10 +50,10 @@ export default function NotificationCenter() {
                          border-b border-gray-100 dark:border-gray-700 transition-colors"
             >
               <p className="text-sm font-medium text-gray-900 dark:text-white">
-                {n.payload?.sender_name || 'New notification'}
+                {String((n.payload as Record<string, unknown>)?.sender_name ?? 'New notification')}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
-                {n.payload?.preview || n.type}
+                {String((n.payload as Record<string, unknown>)?.preview ?? n.type)}
               </p>
               <p className="text-xs text-gray-400 mt-0.5">
                 {new Date(n.created_at).toLocaleTimeString()}

@@ -13,8 +13,6 @@ export declare function disconnectSocket(): void;
 type AnyFn = (...args: any[]) => void;
 
 export interface UseSocketReturn {
-  /** The underlying Socket.IO socket instance (may be null on first render) */
-  socket: Socket | null;
   /** Emit an event to the server */
   emit: (event: string, data?: unknown) => void;
   /** Subscribe to a server event */

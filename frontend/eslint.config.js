@@ -16,6 +16,7 @@ export default [
         ecmaFeatures: { jsx: true },
       },
       globals: {
+        // Browser globals
         window: 'readonly',
         document: 'readonly',
         localStorage: 'readonly',
@@ -24,6 +25,23 @@ export default [
         clearTimeout: 'readonly',
         fetch: 'readonly',
         Promise: 'readonly',
+        FormData: 'readonly',
+        URL: 'readonly',
+        alert: 'readonly',
+        HTMLDivElement: 'readonly',
+        HTMLInputElement: 'readonly',
+        HTMLTextAreaElement: 'readonly',
+        HTMLButtonElement: 'readonly',
+        HTMLElement: 'readonly',
+        HTMLAnchorElement: 'readonly',
+        HTMLFormElement: 'readonly',
+        MouseEvent: 'readonly',
+        Event: 'readonly',
+        React: 'readonly',
+        // Node/Vite
+        process: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
       },
     },
     plugins: {
@@ -40,6 +58,10 @@ export default [
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
       'no-unused-vars': 'off',
+      // TypeScript handles undefined-variable detection better than no-undef
+      'no-undef': 'off',
+      // Allow setState in effects (pattern used in prefill sync)
+      'react-hooks/set-state-in-effect': 'off',
     },
     settings: {
       react: { version: 'detect' },

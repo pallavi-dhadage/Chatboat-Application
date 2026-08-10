@@ -7,9 +7,12 @@ const baseMessage = {
   conversation_id: 'conv-1',
   sender_id:       'user-1',
   sender_name:     'Alice',
+  sender_avatar:   null,
   text:            'Hello there!',
   file_url:        null,
   sentiment_label: null,
+  sentiment_score: null,
+  flagged:         false,
   created_at:      new Date().toISOString(),
 };
 
@@ -20,7 +23,7 @@ describe('MessageBubble', () => {
   });
 
   it('renders sentiment badge when sentiment_label is set', () => {
-    const msg = { ...baseMessage, sentiment_label: 'positive' };
+    const msg = { ...baseMessage, sentiment_label: 'positive' as const };
     render(<MessageBubble message={msg} isOwn={false} />);
     expect(screen.getByText('positive')).toBeTruthy();
   });

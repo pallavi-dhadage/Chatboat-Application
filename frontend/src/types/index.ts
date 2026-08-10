@@ -2,8 +2,7 @@
  * Shared TypeScript interfaces for ChatFlow AI frontend.
  * All API response shapes, store interfaces, and shared types are defined here.
  */
-
-// ---------------------------------------------------------------------------
+import type React from 'react';// ---------------------------------------------------------------------------
 // API Data Models
 // ---------------------------------------------------------------------------
 
