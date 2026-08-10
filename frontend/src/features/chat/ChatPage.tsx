@@ -4,7 +4,7 @@
  *
  * Validates: Requirements 10.4, 10.5, 12.3, 12.4, 12.5, 16.3, 16.4
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -53,6 +53,9 @@ export default function ChatPage() {
   const [activeConvId, setActiveConvId] = useState<string>(routeConvId ?? '');
   const [smartReplies, setSmartReplies] = useState<string[]>([]);
   const [prefillText, setPrefillText] = useState<string>('');
+
+  // Memoised derived value — avoids recomputing on every render
+  const hasActiveConversation = useMemo(() => activeConvId.length > 0, [activeConvId]);
 
   // Sync URL param → local state when user navigates directly to /chat/:id
   useEffect(() => {
@@ -200,7 +203,7 @@ export default function ChatPage() {
 
       {/* ── Message Thread Panel ─────────────────────────────────────── */}
       <AnimatePresence mode="wait">
-        {activeConvId ? (
+        {hasActiveConversation ? (
           <motion.section
             key={activeConvId}
             className="flex flex-1 flex-col overflow-hidden"

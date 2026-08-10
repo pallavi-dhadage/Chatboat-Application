@@ -208,7 +208,7 @@ previous one; no step leaves orphaned code.
   - [x] 14.4 Create `src/features/analytics/AnalyticsPage.tsx` wrapping the existing `<AnalyticsDashboard>` component from `src/components/analytics/`; use `useAnalytics` hook; render `<MetricCardSkeleton>` while loading; render retry button on error
     - _Requirements: 12.3, 12.4_
 
-- [ ] 15. Settings page
+- [x] 15. Settings page
   - Create `src/features/settings/SettingsPage.tsx` with three sections:
     - Profile form: pre-populated from `Auth_Store.user`, validated with `zodResolver(profileSchema)` via `react-hook-form`; on submit call `useUpdateProfile` mutation, update Auth_Store with response, show success toast
     - Theme toggle: renders a light/dark toggle control calling `useTheme().toggleTheme`
@@ -216,17 +216,17 @@ previous one; no step leaves orphaned code.
     - Danger Zone: "Log Out" button that calls `useAuth().logout`, clears localStorage, redirects to `/login`
   - _Requirements: 17.1, 17.2, 17.3, 17.4, 17.5_
 
-- [ ] 16. Cleanup and TypeScript migration completion
-  - [ ] 16.1 Rename all remaining `.jsx` source files to `.tsx` and all `.js` files in `src/` to `.ts`; update all imports accordingly; remove `src/App.jsx` and `src/Auth.jsx` if they still exist as separate files; remove `src/api/client.js` (replaced by `src/lib/apiClient.ts`); remove `src/store/authSlice.js` (replaced by `src/store/authStore.ts`)
+- [x] 16. Cleanup and TypeScript migration completion
+  - [x] 16.1 Rename all remaining `.jsx` source files to `.tsx` and all `.js` files in `src/` to `.ts`; update all imports accordingly; remove `src/App.jsx` and `src/Auth.jsx` if they still exist as separate files; remove `src/api/client.js` (replaced by `src/lib/apiClient.ts`); remove `src/store/authSlice.js` (replaced by `src/store/authStore.ts`)
     - _Requirements: 1.2_
 
-  - [ ] 16.2 Run `tsc --noEmit`; fix all remaining type errors in migrated `.tsx` files, paying particular attention to existing component files under `src/components/chat/`, `src/components/ai/`, `src/components/analytics/`, and `src/hooks/useSocket.ts`
+  - [x] 16.2 Run `tsc --noEmit`; fix all remaining type errors in migrated `.tsx` files, paying particular attention to existing component files under `src/components/chat/`, `src/components/ai/`, `src/components/analytics/`, and `src/hooks/useSocket.ts`
     - _Requirements: 1.5_
 
-  - [ ] 16.3 Add `React.memo` wrappers to pure presentational components (`MetricCard`, `Skeleton`, `Badge`, `Avatar`, `MessageBubble`); add `useMemo` for derived computations in `DashboardPage` and `ChatPage`; verify Vite production build completes without errors and produces hashed filenames in `dist/`
+  - [x] 16.3 Add `React.memo` wrappers to pure presentational components (`MetricCard`, `Skeleton`, `Badge`, `Avatar`, `MessageBubble`); add `useMemo` for derived computations in `DashboardPage` and `ChatPage`; verify Vite production build completes without errors and produces hashed filenames in `dist/`
     - _Requirements: 19.2, 19.4, 19.5_
 
-- [ ] 17. Final checkpoint — full quality pass
+- [x] 17. Final checkpoint — full quality pass
   - Run `tsc --noEmit` from `frontend/` — must report zero errors
   - Run ESLint against `src/` — must report zero errors
   - Run the full test suite — all tests must pass (property tests included)

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { useAnalytics } from '../../hooks/useAnalytics';
 import { useAuthStore } from '../../store/authStore';
@@ -290,7 +290,10 @@ export default function DashboardPage() {
   }, [isError, error]);
 
   // Derive the user's first name for the welcome heading
-  const firstName = user?.name?.split(' ')[0] ?? 'there';
+  const firstName = useMemo(
+    () => user?.name?.split(' ')[0] ?? 'there',
+    [user?.name],
+  );
 
   // When loading=false and data is undefined (error state), getValue returns "—"
   // for every card — this satisfies the fallback requirement.
