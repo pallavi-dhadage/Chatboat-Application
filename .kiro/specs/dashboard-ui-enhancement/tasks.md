@@ -33,7 +33,7 @@ previous one; no step leaves orphaned code.
   - [x] 3.1 Create `src/store/authStore.ts` implementing `AuthState` with `setAuth`, `clearAuth`, `setUser` actions; initialize from `localStorage` keys `cf_access_token`, `cf_refresh_token`, `cf_user` on mount
     - _Requirements: 3.1, 3.4_
 
-  - [ ]* 3.2 Write property tests for Auth_Store setAuth / clearAuth invariants
+  - [x]* 3.2 Write property tests for Auth_Store setAuth / clearAuth invariants
     - **Property 1: Auth_Store setAuth / clearAuth invariants**
     - **Validates: Requirements 3.1, 3.4**
     - Use `fc.string()` for tokens and a custom `fc.record` arbitrary for User objects
@@ -42,7 +42,7 @@ previous one; no step leaves orphaned code.
   - [x] 3.3 Create `src/store/chatStore.ts` implementing `ChatState` with `setConversations`, `setActiveConversation`, `addMessage`, `setTypingUsers` actions
     - _Requirements: 3.2_
 
-  - [ ]* 3.4 Write property test for Chat_Store addMessage append invariant
+  - [x]* 3.4 Write property test for Chat_Store addMessage append invariant
     - **Property 2: Chat_Store addMessage append invariant**
     - **Validates: Requirements 3.2**
     - For any initial messages state and any Message object, assert the array for that `conversationId` is exactly one element longer and its last element equals the appended message
@@ -50,7 +50,7 @@ previous one; no step leaves orphaned code.
   - [x] 3.5 Create `src/store/uiStore.ts` implementing `UIState` with `toggleSidebar`, `setSidebarOpen`, `setActiveView`, `toggleTheme` actions; call `applyTheme(savedTheme)` at module load to avoid flash of unstyled content
     - _Requirements: 3.3, 3.5_
 
-  - [ ]* 3.6 Write property tests for UI_Store toggle invariants
+  - [x]* 3.6 Write property tests for UI_Store toggle invariants
     - **Property 3: UI_Store toggleSidebar idempotence**
     - **Validates: Requirements 3.3**
     - Two successive `toggleSidebar()` calls must restore the original `sidebarOpen` value
@@ -62,7 +62,7 @@ previous one; no step leaves orphaned code.
   - [x] 4.1 Create `src/lib/apiClient.ts` as an Axios instance with `baseURL` from `VITE_API_URL` (dev-mode warning fallback to `http://localhost:5001`), JWT request interceptor reading `useAuthStore.getState().token`, 401 response interceptor with refresh-queue pattern and `clearAuth` + redirect on refresh failure, and 429 handler that parses `Retry-After` into a `retryAfter` field; suppress request/response body logging when `import.meta.env.PROD`
     - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 18.1, 18.4_
 
-  - [ ]* 4.2 Write property tests for API client interceptors
+  - [x]* 4.2 Write property tests for API client interceptors
     - **Property 9: API client JWT injection**
     - **Validates: Requirements 11.2**
     - For any non-null token, every request must include `Authorization: Bearer <token>`; for null token, header must be absent
@@ -77,7 +77,7 @@ previous one; no step leaves orphaned code.
   - [x] 4.4 Create custom query hooks in `src/hooks/`: `useAnalytics` (60 s staleTime), `useConversations`, `useMessages(conversationId)`, `useNotifications`, `useCurrentUser`; also create `useSendMessage` and `useUpdateProfile` mutation hooks that invalidate the relevant query keys on success; add JSDoc to all hook return types
     - _Requirements: 12.2, 12.6, 20.5_
 
-  - [ ]* 4.5 Write property tests for React Query cache behavior
+  - [x]* 4.5 Write property tests for React Query cache behavior
     - **Property 11: Analytics cache prevents redundant fetches**
     - **Validates: Requirements 7.6**
     - Assert no new network request is dispatched when `useAnalytics` is called again within 60 s of a successful fetch
@@ -108,7 +108,7 @@ previous one; no step leaves orphaned code.
   - Set default opacity within the `[0.04, 0.10]` range for light mode; document dark-mode class override for `[0.06, 0.12]` range
   - _Requirements: 9.1, 9.2, 9.3, 9.5_
 
-  - [ ]* 7.1 Write property tests for SVG doodle accessibility and opacity
+  - [x]* 7.1 Write property tests for SVG doodle accessibility and opacity
     - **Property 16: SVG doodle accessibility attributes**
     - **Validates: Requirements 9.5**
     - For any rendered doodle component, assert `aria-hidden="true"` and `focusable="false"` are present on the root `<svg>` element
@@ -123,7 +123,7 @@ previous one; no step leaves orphaned code.
   - [x] 8.2 Create `src/hooks/useTheme.ts` reading `useUIStore` with a selector for `theme` and `toggleTheme`, returning `{ theme, toggleTheme, isDark }`; and `src/hooks/useToast.ts` wrapping `react-hot-toast` with typed `success`, `error`, and `info` helpers that enforce the ≤80-character constraint via `.slice(0, 80)`; add JSDoc to all return types
     - _Requirements: 14.5, 20.4, 20.5_
 
-  - [ ]* 8.3 Write property test for toast message length constraint
+  - [x]* 8.3 Write property test for toast message length constraint
     - **Property 15: Toast message length constraint**
     - **Validates: Requirements 14.5**
     - For any arbitrary-length string passed to `useToast().success/error/info`, the string ultimately passed to `react-hot-toast` must have length ≤ 80
@@ -135,7 +135,7 @@ previous one; no step leaves orphaned code.
   - [x] 9.2 Create `src/components/layout/ProtectedRoute.tsx` that reads `Auth_Store.isAuthenticated`; redirects to `/login?redirect=<current-path>` when false; renders `children` when true
     - _Requirements: 4.2_
 
-  - [ ]* 9.3 Write property tests for route redirect logic
+  - [x]* 9.3 Write property tests for route redirect logic
     - **Property 5: Protected route redirect universality**
     - **Validates: Requirements 4.2**
     - For each path in `{'/dashboard', '/chat', '/ai', '/analytics', '/settings'}`, rendering `<ProtectedRoute>` with `isAuthenticated === false` must redirect to `/login` with the original path as the `redirect` query parameter
@@ -146,7 +146,7 @@ previous one; no step leaves orphaned code.
   - [x] 9.4 Create `src/components/layout/Sidebar.tsx` with a Framer Motion `<motion.aside>` animating `width` between 240 px (expanded) and 64 px (collapsed) over 300 ms; render nav items from a static array of `NavItem` objects; fade out text labels on collapse while keeping icons visible; highlight active route with navy-700 background and teal left-border; render user footer with `<Avatar>`, display name, and `<Badge>`; conditionally render "Admin Panel" item for `user.role === 'admin'`; implement mobile overlay with `bg-black/40` backdrop that calls `setSidebarOpen(false)` when tapped
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 6.2, 6.3, 10.1_
 
-  - [ ]* 9.5 Write property tests for Sidebar conditional rendering
+  - [x]* 9.5 Write property tests for Sidebar conditional rendering
     - **Property 7: Sidebar admin item visibility**
     - **Validates: Requirements 5.7**
     - For any User object with `role === 'admin'`, the "Admin Panel" nav item must be present; for `role === 'user'` or `'moderator'`, it must be absent
@@ -197,7 +197,7 @@ previous one; no step leaves orphaned code.
   - [x] 14.1 Create `src/features/chat/ChatPage.tsx`; read `conversationId` from route params; use `useConversations` and `useMessages` hooks; render `<ConversationListSkeleton>` or `<MessageThreadSkeleton>` while loading; call `queryClient.setQueryData` from the existing `useSocket` hook on `new_message` events to update the cache without a full refetch; wrap existing chat sub-components (`ConversationList`, `MessageThread`, `MessageInput`, etc.) from `src/components/chat/`; apply Framer Motion fade-in slide-up on new message render
     - _Requirements: 10.4, 10.5, 12.3, 12.4, 12.5, 16.3, 16.4_
 
-  - [ ]* 14.2 Write property test for socket cache update
+  - [x]* 14.2 Write property test for socket cache update
     - **Property 13: useMessages socket cache update**
     - **Validates: Requirements 12.5**
     - For any incoming `new_message` socket event for conversation ID X, assert the React Query cache entry for `queryKeys.messages(X)` includes the new message and that no new HTTP request to the messages endpoint was triggered
